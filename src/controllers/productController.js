@@ -19,7 +19,6 @@ exports.getProducts = async (req,res)=>{
     if (redis) {
       await redis.set(cacheKey, JSON.stringify(products), { EX: 60 });
     }
-
     res.json(products);
 
   }catch(err){
@@ -39,7 +38,6 @@ exports.createProduct = async (req,res)=>{
     }
 
     res.status(201).json(product);
-
   }catch(err){
     console.error(err);
     res.status(500).json({message:"Error creating product"});
