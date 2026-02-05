@@ -8,7 +8,10 @@ if (process.env.REDIS_URL) {
   client.on("connect", () => console.log("Redis Connected"));
   client.on("error", (err) => console.log("Redis Error:", err.message));
 
-  client.connect();
+  client.connect().catch(() => {
+    console.log("Redis connection failed, continuing without cache");
+    client = null;
+  });
 } else {
   console.log("Redis not configured, running without cache");
 }
