@@ -1,16 +1,18 @@
 const { createClient } = require("redis");
 
-const client = createClient({
-  url: process.env.REDIS_URL
-});
-client.on("connect", () => {
-  console.log("Redis Connected");
-});
-client.on("error", (err) => {
-  console.log("Redis Error:", err.message);
-});
-(async () => {
-  await client.connect();
-})();
+let client;
+
+if (process.env.REDIS_URL) {
+  client = createClient({
+    url: process.env.REDIS_URL
+  });
+
+  client.on("connect", () => console.log("Redis Connected"));
+  client.on("error", (err) => console.log("Redis Error:", err.message));
+
+  client.connect();
+} else {
+  console.log("Redis not configured, running without cache");
+}
 
 module.exports = client;
