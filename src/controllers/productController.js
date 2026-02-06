@@ -4,11 +4,18 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit);
 
     if (products.length === 0) {
       const externalProducts = await fetchExternalProducts();
-      return res.status(200).json(externalProducts);
+      const paginatedExternal = externalProducts.slice(skip, skip + limit);
+      return res.status(200).json(paginatedExternal);
     }
 
     res.status(200).json(products);
@@ -22,7 +29,7 @@ exports.getProducts = async (req, res) => {
 exports.createProduct = async (req,res)=>{
   try{
     const product = await Product.create(req.body);
-    
+
     if (redis) {
       const keys = await redis.keys("products:*");
       if (keys.length > 0) {
