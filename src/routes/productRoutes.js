@@ -1,7 +1,9 @@
 const router = require("express").Router();
+const { syncProducts } = require("../controllers/syncProducts");
 const {getProducts,createProduct} = require("../controllers/productController");
 const { fetchExternalProducts } = require("../services/externalService");
 
+router.post("/sync", syncProducts);
 router.get("/",getProducts);
 
 router.post("/",createProduct);

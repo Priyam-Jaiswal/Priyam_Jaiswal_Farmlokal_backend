@@ -4,17 +4,28 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
 
-    if (products.length === 0) {
-      const externalProducts = await fetchExternalProducts();
-      return res.status(200).json(externalProducts);
-    }
+    const skip = (page - 1) * limit;
 
-    res.status(200).json(products);
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit);
 
-  } catch (err) {
-    console.error("Get Products Error:", err.message);
+    const totalProducts = await Product.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      page,
+      limit,
+      totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      products
+    });
+
+  } catch (error) {
+    console.error("Pagination Error:", error);
     res.status(500).json({ message: "Error fetching products" });
   }
 };
