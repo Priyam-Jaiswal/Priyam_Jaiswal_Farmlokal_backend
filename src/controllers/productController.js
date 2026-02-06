@@ -4,18 +4,11 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const products = await Product.find()
-      .skip(skip)
-      .limit(limit);
+    const products = await Product.find();
 
     if (products.length === 0) {
       const externalProducts = await fetchExternalProducts();
-      const paginatedExternal = externalProducts.slice(skip, skip + limit);
-      return res.status(200).json(paginatedExternal);
+      return res.status(200).json(externalProducts);
     }
 
     res.status(200).json(products);
