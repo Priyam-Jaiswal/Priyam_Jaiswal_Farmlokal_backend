@@ -1,12 +1,6 @@
 const { Redis } = require("@upstash/redis");
 
 let redis = null;
-console.log("REDIS URL", process.env.REDIS_URL);
-console.log(
-  "REDIS TOKEN LENGTH",
-  process.env.REDIS_TOKEN?.length
-);
-
 try {
   redis = new Redis({
     url: process.env.REDIS_URL,
