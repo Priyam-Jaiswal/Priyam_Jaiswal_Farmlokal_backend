@@ -23,7 +23,7 @@ Nodemon
 
 **Endpoint:**
 GET /api/products?page=1&limit=5
-"https://your-render-deployment-url.onrender.com/api/products?page=1&limit=5"
+"https://priyam-jaiswal-farmlokal-backend.onrender.com/api/products?page=1&limit=5"
 
 
 **Redis Caching**
