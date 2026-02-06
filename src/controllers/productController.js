@@ -4,14 +4,35 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    if (products.length === 0) {
+    const total = await Product.countDocuments();
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit);
+
+    if (total === 0) {
       const externalProducts = await fetchExternalProducts();
-      return res.status(200).json(externalProducts);
+      const paginatedExternal = externalProducts.slice(skip, skip + limit);
+
+      return res.status(200).json({
+        source: "external",
+        page,
+        limit,
+        total: externalProducts.length,
+        products: paginatedExternal
+      });
     }
 
-    res.status(200).json(products);
+    res.status(200).json({
+      source: "database",
+      page,
+      limit,
+      total,
+      products
+    });
 
   } catch (err) {
     console.error("Get Products Error:", err.message);
@@ -19,9 +40,10 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-exports.createProduct = async (req,res)=>{
-  try{
+exports.createProduct = async (req, res) => {
+  try {
     const product = await Product.create(req.body);
+
     if (redis) {
       const keys = await redis.keys("products:*");
       if (keys.length > 0) {
@@ -30,8 +52,8 @@ exports.createProduct = async (req,res)=>{
     }
 
     res.status(201).json(product);
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    res.status(500).json({message:"Error creating product"});
+    res.status(500).json({ message: "Error creating product" });
   }
 };
