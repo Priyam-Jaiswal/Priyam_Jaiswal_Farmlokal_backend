@@ -4,31 +4,17 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, category } = req.query;
-    const cacheKey = `products:${page}:${limit}:${category || "all"}`;
-
-    if (redis) {
-      const cache = await redis.get(cacheKey);
-      if (cache) {
-        return res.json(JSON.parse(cache));
-      }
-    }
-
-    const query = category ? { category } : {};
-    let products = await Product.find(query)
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+    const products = await Product.find();
 
     if (products.length === 0) {
-      products = await fetchExternalProducts();
-    }
-    if (redis) {
-      await redis.set(cacheKey, JSON.stringify(products), { EX: 60 });
+      const externalProducts = await fetchExternalProducts();
+      return res.status(200).json(externalProducts);
     }
 
-    res.json(products);
+    res.status(200).json(products);
+
   } catch (err) {
-    console.error(err);
+    console.error("Get Products Error:", err.message);
     res.status(500).json({ message: "Error fetching products" });
   }
 };
