@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@upstash/redis": "^1.36.2",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -22,11 +23,9 @@
     "mongodb": "^7.1.0",
     "mongoose": "^9.1.6",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "redis": "^5.10.0"
+    "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
   }
 }
-

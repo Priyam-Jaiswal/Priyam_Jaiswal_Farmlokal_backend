@@ -1,21 +1,21 @@
-const { createClient } = require("redis");
+const { Redis } = require("@upstash/redis");
 
-let client = null;
+let redis = null;
+console.log("REDIS URL", process.env.REDIS_URL);
+console.log(
+  "REDIS TOKEN LENGTH",
+  process.env.REDIS_TOKEN?.length
+);
 
-if (process.env.REDIS_URL) {
-  client = createClient({
-    url: process.env.REDIS_URL
+try {
+  redis = new Redis({
+    url: process.env.REDIS_URL,
+    token: process.env.REDIS_TOKEN
   });
 
-  client.on("connect", () => console.log("Redis Connected"));
-  client.on("error", (err) => console.log("Redis Error:", err.message));
 
-  client.connect().catch(() => {
-    console.log("Redis failed, running without cache");
-    client = null;
-  });
-} else {
-  console.log("Redis disabled (no REDIS_URL)");
+} catch (err) {
+  console.error(" Redis init failed:", err.message);
 }
 
-module.exports = client;
+module.exports = redis;

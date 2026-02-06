@@ -4,28 +4,43 @@ const { fetchExternalProducts } = require("../services/externalService");
 
 exports.getProducts = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 5);
     const skip = (page - 1) * limit;
+
+    const cacheKey = `products:page=${page}:limit=${limit}`;
+
+    if (redis) {
+      const cachedData = await redis.get(cacheKey);
+      if (cachedData) {
+        return res.status(200).json(cachedData);
+      }
+    }
 
     const products = await Product.find()
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
     const totalProducts = await Product.countDocuments();
 
-    res.status(200).json({
+    const response = {
       success: true,
       page,
       limit,
       totalProducts,
       totalPages: Math.ceil(totalProducts / limit),
       products
-    });
+    };
+
+    if (redis) {
+      await redis.set(cacheKey, response, { ex: 60 });
+    }
+
+    res.status(200).json(response);
 
   } catch (error) {
-    console.error("Pagination Error:", error);
+    console.error("PRODUCT FETCH ERROR", error.message);
     res.status(500).json({ message: "Error fetching products" });
   }
 };
